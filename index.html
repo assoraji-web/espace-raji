@@ -16,7 +16,7 @@ img.l{width:84px;height:84px;border-radius:50%;display:block;margin:0 auto 8px}h
 h2{font-size:1.1rem;margin:.2em 0 .5em}p{margin:.5em 0}.m{color:var(--m);font-size:.9rem}
 button,a.btn{display:block;width:100%;min-height:52px;border:0;border-radius:12px;background:var(--g);color:#fff;font:600 1.05rem system-ui;text-align:center;line-height:52px;text-decoration:none;cursor:pointer}
 button.s{background:transparent;color:var(--g);border:2px solid var(--g);line-height:normal}
-ol{padding-left:1.2em}li{margin:.5em 0}.hide{display:none}.warn{border-left:6px solid var(--o)}
+ol{padding-left:1.2em}li{margin:.5em 0}.hide{display:none!important}#lk:not(.hide){display:flex}.warn{border-left:6px solid var(--o)}
 </style></head><body><main>
 <div class="card"><img class="l" src="icons/icon-192.png" alt="Logo RAJI"><h1>Espace RAJI</h1>
 <p style="text-align:center">Ajoutez l’icône <b>RAJI</b> sur l’écran d’accueil de votre téléphone : un seul geste pour ouvrir votre espace.</p>
@@ -29,19 +29,41 @@ ol{padding-left:1.2em}li{margin:.5em 0}.hide{display:none}.warn{border-left:6px 
 <div class="card" id="ios"><h2>🍎 iPhone (Safari)</h2>
 <ol><li>Ouvrez cette page <b>dans Safari</b> (pas dans WhatsApp ni Facebook).</li><li>Touchez le bouton <b>Partager</b> (carré avec une flèche vers le haut).</li><li>Faites défiler et touchez <b>« Sur l’écran d’accueil »</b>, puis <b>« Ajouter »</b>.</li></ol></div>
 
+<div class="card hide" id="bio"><h2>🔒 Verrou empreinte / visage</h2>
+<p class="m" id="bioTxt">Pour ceux dont le téléphone sait lire l’empreinte digitale ou le visage : l’icône RAJI demandera ce geste avant d’ouvrir l’espace.</p>
+<button id="bioOn" type="button">Activer le verrou</button><button id="bioOff" class="s hide" type="button" style="margin-top:8px">Désactiver le verrou</button>
+<p class="m" id="bioMsg" role="status"></p></div>
+
 <div class="card warn"><h2>À savoir</h2>
 <p class="m">• Votre code personnel est toujours demandé la première fois ; cochez « Mémoriser cet appareil » sur votre téléphone personnel pour ne plus le ressaisir.</p>
 <p class="m">• Ne partagez jamais votre code. Cette page ne contient aucune donnée de l’association.</p>
+<p class="m">• Le verrou empreinte/visage protège l’ouverture de l’icône sur ce téléphone ; il ne remplace pas votre code personnel et ne s’active que si vous le décidez.</p>
 <p class="m">• Si l’icône ouvre une page vide, ouvrez d’abord le lien reçu par e-mail puis réessayez.</p></div>
 </main>
+<div id="lk" class="hide" style="position:fixed;inset:0;background:var(--bg);align-items:center;justify-content:center;padding:24px;z-index:9"><div class="card" style="text-align:center;max-width:420px"><img class="l" src="icons/icon-192.png" alt=""><h1>Espace RAJI</h1><p>Posez votre doigt ou regardez l’écran pour ouvrir votre espace.</p><button id="lkGo" type="button">Déverrouiller</button><button id="lkOff" class="s" type="button" style="margin-top:8px">Désactiver le verrou sur ce téléphone</button><p class="m" id="lkMsg" role="status"></p></div></div>
 <script src="config.js"></script>
 <script>
 (function(){
 var U=window.RAJI_EXEC_URL||'',ok=/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/.test(U);
 var sa=(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true;
 var o=document.getElementById('open');
-if(ok){o.href=U;if(sa||/[?&]app=1/.test(location.search)&&sa){location.replace(U)}}
-else{o.textContent='Lien de l’Espace RAJI non configuré';o.style.opacity='.6';o.addEventListener('click',function(e){e.preventDefault()})}
+var K='raji_bio_v1',ls={g:function(){try{return localStorage.getItem(K)}catch(e){return null}},s:function(v){try{localStorage.setItem(K,v);return true}catch(e){return false}},d:function(){try{localStorage.removeItem(K)}catch(e){}}};
+var b64=function(a){return btoa(String.fromCharCode.apply(null,new Uint8Array(a))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')},unb=function(t){t=t.replace(/-/g,'+').replace(/_/g,'/');var r=atob(t+'==='.slice((t.length+3)%4)),u=new Uint8Array(r.length);for(var i=0;i<r.length;i++)u[i]=r.charCodeAt(i);return u};
+var rnd=function(n){var u=new Uint8Array(n);crypto.getRandomValues(u);return u};
+var launched=sa||/[?&]app=1/.test(location.search);
+function go(){location.replace(U)}
+function unlock(){var id=ls.g(),m=document.getElementById('lkMsg');m.textContent='';
+ navigator.credentials.get({publicKey:{challenge:rnd(32),allowCredentials:[{id:unb(id),type:'public-key'}],userVerification:'required',timeout:60000}}).then(go).catch(function(){m.textContent='Geste non reconnu ou annulé. Réessayez.'})}
+if(!ok){o.textContent='Lien de l’Espace RAJI non configuré';o.style.opacity='.6';o.addEventListener('click',function(e){e.preventDefault()})}
+else{o.href=U;
+ if(launched){if(ls.g()&&window.PublicKeyCredential&&navigator.credentials){var L=document.getElementById('lk');L.classList.remove('hide');document.getElementById('lkGo').onclick=unlock;document.getElementById('lkOff').onclick=function(){ls.d();go()};unlock()}else if(sa){go()}}
+ o.addEventListener('click',function(e){if(ls.g()&&window.PublicKeyCredential){e.preventDefault();var L=document.getElementById('lk');L.classList.remove('hide');document.getElementById('lkGo').onclick=unlock;document.getElementById('lkOff').onclick=function(){ls.d();go()};unlock()}})}
+// verrou biométrique : disponible seulement si le téléphone propose une vérification d’identité intégrée
+var B=document.getElementById('bio'),bm=document.getElementById('bioMsg'),on=document.getElementById('bioOn'),off=document.getElementById('bioOff');
+function bstate(){var a=!!ls.g();on.classList.toggle('hide',a);off.classList.toggle('hide',!a);document.getElementById('bioTxt').textContent=a?'Verrou activé sur ce téléphone : un geste (empreinte ou visage) sera demandé à chaque ouverture de l’icône.':'Pour ceux dont le téléphone sait lire l’empreinte digitale ou le visage : l’icône RAJI demandera ce geste avant d’ouvrir l’espace.'}
+if(window.PublicKeyCredential&&PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable&&window.isSecureContext){PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable().then(function(v){if(v){B.classList.remove('hide');bstate()}}).catch(function(){})}
+on.onclick=function(){bm.textContent='';navigator.credentials.create({publicKey:{rp:{name:'Espace RAJI'},user:{id:rnd(16),name:'membre-raji',displayName:'Membre RAJI'},challenge:rnd(32),pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required',residentKey:'discouraged'},attestation:'none',timeout:60000}}).then(function(c){if(ls.s(b64(c.rawId))){bm.textContent='Verrou activé.'}else{bm.textContent='Ce navigateur ne permet pas de mémoriser le verrou.'}bstate()}).catch(function(){bm.textContent='Activation annulée ou impossible sur ce téléphone.'})};
+off.onclick=function(){ls.d();bm.textContent='Verrou désactivé.';bstate()};
 var ios=/iphone|ipad|ipod/i.test(navigator.userAgent);
 document.getElementById('android').classList.toggle('hide',ios);document.getElementById('ios').classList.toggle('hide',!ios&&/android/i.test(navigator.userAgent));
 var dp;window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();dp=e;var b=document.getElementById('inst');b.classList.remove('hide');document.getElementById('aSteps').classList.add('hide')});
