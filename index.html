@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Installer l’Espace RAJI</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1B5E20">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="RAJI"><meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png"><link rel="icon" href="icons/icon-192.png">
+<style>
+:root{--g:#1B5E20;--o:#C9A227;--bg:#F1F5F1;--c:#fff;--t:#1d2a1d;--m:#55675a}
+@media(prefers-color-scheme:dark){:root{--bg:#101a12;--c:#18251b;--t:#eaf2ea;--m:#a9bcae}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:17px/1.5 system-ui,sans-serif;padding:16px}
+main{max-width:520px;margin:0 auto}.card{background:var(--c);border-radius:16px;padding:20px;margin:14px 0;box-shadow:0 1px 6px #0002}
+img.l{width:84px;height:84px;border-radius:50%;display:block;margin:0 auto 8px}h1{font-size:1.4rem;text-align:center;margin:.2em 0;color:var(--g)}
+h2{font-size:1.1rem;margin:.2em 0 .5em}p{margin:.5em 0}.m{color:var(--m);font-size:.9rem}
+button,a.btn{display:block;width:100%;min-height:52px;border:0;border-radius:12px;background:var(--g);color:#fff;font:600 1.05rem system-ui;text-align:center;line-height:52px;text-decoration:none;cursor:pointer}
+button.s{background:transparent;color:var(--g);border:2px solid var(--g);line-height:normal}
+ol{padding-left:1.2em}li{margin:.5em 0}.hide{display:none}.warn{border-left:6px solid var(--o)}
+</style></head><body><main>
+<div class="card"><img class="l" src="icons/icon-192.png" alt="Logo RAJI"><h1>Espace RAJI</h1>
+<p style="text-align:center">Ajoutez l’icône <b>RAJI</b> sur l’écran d’accueil de votre téléphone : un seul geste pour ouvrir votre espace.</p>
+<a id="open" class="btn" href="#">Ouvrir l’Espace RAJI</a></div>
+
+<div class="card" id="android"><h2>📱 Android (Chrome)</h2>
+<button id="inst" class="hide" type="button">Installer l’icône RAJI</button>
+<ol id="aSteps"><li>Touchez les <b>trois points ⋮</b> en haut à droite de Chrome.</li><li>Choisissez <b>« Installer l’application »</b> ou <b>« Ajouter à l’écran d’accueil »</b>.</li><li>Confirmez. L’icône RAJI apparaît parmi vos applications.</li></ol></div>
+
+<div class="card" id="ios"><h2>🍎 iPhone (Safari)</h2>
+<ol><li>Ouvrez cette page <b>dans Safari</b> (pas dans WhatsApp ni Facebook).</li><li>Touchez le bouton <b>Partager</b> (carré avec une flèche vers le haut).</li><li>Faites défiler et touchez <b>« Sur l’écran d’accueil »</b>, puis <b>« Ajouter »</b>.</li></ol></div>
+
+<div class="card warn"><h2>À savoir</h2>
+<p class="m">• Votre code personnel est toujours demandé la première fois ; cochez « Mémoriser cet appareil » sur votre téléphone personnel pour ne plus le ressaisir.</p>
+<p class="m">• Ne partagez jamais votre code. Cette page ne contient aucune donnée de l’association.</p>
+<p class="m">• Si l’icône ouvre une page vide, ouvrez d’abord le lien reçu par e-mail puis réessayez.</p></div>
+</main>
+<script>
+(function(){
+var U=window.RAJI_EXEC_URL||'',ok=/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/.test(U);
+var sa=(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true;
+var o=document.getElementById('open');
+if(ok){o.href=U;if(sa||/[?&]app=1/.test(location.search)&&sa){location.replace(U)}}
+else{o.textContent='Lien de l’Espace RAJI non configuré';o.style.opacity='.6';o.addEventListener('click',function(e){e.preventDefault()})}
+var ios=/iphone|ipad|ipod/i.test(navigator.userAgent);
+document.getElementById('android').classList.toggle('hide',ios);document.getElementById('ios').classList.toggle('hide',!ios&&/android/i.test(navigator.userAgent));
+var dp;window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();dp=e;var b=document.getElementById('inst');b.classList.remove('hide');document.getElementById('aSteps').classList.add('hide')});
+document.getElementById('inst').onclick=function(){if(dp){dp.prompt();dp=null}};
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(function(){});
+})();
+</script></body></html>
